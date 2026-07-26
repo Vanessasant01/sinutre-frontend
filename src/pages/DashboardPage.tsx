@@ -23,13 +23,6 @@ interface DashboardPageProps {
   drawerId: string;
 }
 
-//const MODAL_MACROS = {
-//  carbs: 0,
-//  proteins: 0,
-//  fats: 0,
-//  calories: 0,
-//};
-
 export function DashboardPage({ drawerId }: DashboardPageProps) {
   const { user } = useAuth();
   if (!user){
@@ -39,6 +32,7 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
 
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [buscaRefeicao, setBuscaRefeicao] = useState('');
 
   async function loadMeals() {
     try {
@@ -53,14 +47,18 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
     loadMeals();
   }, []);
 
+  const refeicoesFiltradas = useMemo(() => {
+    return meals
+      .filter(ref => ref.name.toLowerCase().includes(buscaRefeicao.toLowerCase()))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [meals, buscaRefeicao]);
+
   const mealsSummary = useMemo(() => {
     const today = new Date();
-
     const total = meals.length;
 
     const todayCount = meals.filter((meal) => {
       const date = new Date(meal.eatTime);
-
       return (
         date.getDate() === today.getDate() &&
         date.getMonth() === today.getMonth() &&
@@ -70,7 +68,6 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
 
     const monthCount = meals.filter((meal) => {
       const date = new Date(meal.eatTime);
-
       return (
         date.getMonth() === today.getMonth() &&
         date.getFullYear() === today.getFullYear()
@@ -107,12 +104,10 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
         proteins: 0,
         fats: 0,
         calories: 0,
-
-        caloriesGoal: 1000, //ainda não veio do banco de dados
+        caloriesGoal: 1000,
       },
     );
   }, [meals]);
-
 
   if (loading) {
     return (
@@ -131,6 +126,16 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
           avatarUrl={user.avatarUrl}
         />
 
+        <div className="w-full mb-2">
+          <input
+            type="text"
+            placeholder="🔍 Buscar refeição por nome..."
+            value={buscaRefeicao}
+            onChange={(e) => setBuscaRefeicao(e.target.value)}
+            className="w-full p-3 rounded-lg border border-gray-300 text-base"
+          />
+        </div>
+
         <MacroStatsBar summary={macroSummary} />
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 items-stretch">
@@ -138,8 +143,8 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
           <AddMealCard onSelectCategory={modal.openWith} />
         </div>
 
-        <MealsTable meals={meals} />
-        <MealsList meals={meals} />
+        <MealsTable meals={refeicoesFiltradas} />
+        <MealsList meals={refeicoesFiltradas} />
       </div>
 
       <MealFab onSelectCategory={modal.openWith} />
