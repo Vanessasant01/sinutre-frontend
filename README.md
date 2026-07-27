@@ -17,5 +17,5 @@ Consome a API do repositório sinutre-backend.
 
 ## 🔗 Links
 - Repositório Backend: https://github.com/Vanessasant01/sinutre-backend
-- Aplicação online: [colocar link do Vercel depois]
+- Aplicação online:https://sinutre-frontend-d7i6.vercel.app
 -
